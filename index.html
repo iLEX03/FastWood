@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Corta Madera ASCII - Taller Arcade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Corta Madera ASCII - Mobile Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap');
@@ -25,7 +25,9 @@
             touch-action: none;
             user-select: none;
             -webkit-user-select: none;
-            overflow-x: hidden;
+            overflow: hidden;
+            height: 100dvh;
+            width: 100vw;
         }
 
         /* CRT Scanline effect overlay */
@@ -41,28 +43,24 @@
         .ascii-box {
             border: 2px solid var(--wood-amber);
             background-color: #140d08;
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.2), inset 0 0 8px rgba(0,0,0,0.9);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.18), inset 0 0 6px rgba(0,0,0,0.9);
         }
 
         .ascii-btn {
             font-family: 'Fira Code', monospace;
             background-color: #24160e;
-            border: 2px solid var(--wood-amber);
+            border: 1.5px solid var(--wood-amber);
             color: var(--wood-light);
-            transition: all 0.12s ease;
+            transition: all 0.1s ease;
             box-shadow: 2px 2px 0px var(--wood-dark);
-        }
-
-        .ascii-btn:hover {
-            background-color: var(--wood-dark);
-            color: #ffffff;
-            transform: translate(-1px, -1px);
-            box-shadow: 3px 3px 0px var(--wood-amber);
+            touch-action: manipulation;
         }
 
         .ascii-btn:active {
             transform: translate(1px, 1px);
-            box-shadow: 1px 1px 0px var(--wood-dark);
+            box-shadow: 0px 0px 0px var(--wood-dark);
+            background-color: var(--wood-dark);
+            color: #ffffff;
         }
 
         .ascii-btn-green {
@@ -70,155 +68,145 @@
             color: var(--term-green);
             box-shadow: 2px 2px 0px #064e3b;
         }
-        .ascii-btn-green:hover {
+        .ascii-btn-green:active {
             background-color: #065f46;
             color: #ffffff;
-            box-shadow: 3px 3px 0px var(--term-green);
         }
 
-        .glow-amber {
-            text-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
-        }
-        .glow-green {
-            text-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
-        }
-        .glow-red {
-            text-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
-        }
+        .glow-amber { text-shadow: 0 0 8px rgba(245, 158, 11, 0.7); }
+        .glow-green { text-shadow: 0 0 8px rgba(16, 185, 129, 0.8); }
+        .glow-red { text-shadow: 0 0 8px rgba(239, 68, 68, 0.8); }
 
         canvas {
             image-rendering: pixelated;
+            touch-action: none;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-2 sm:p-4 select-none">
+<body class="h-[100dvh] w-screen flex flex-col justify-between p-2 select-none overflow-hidden bg-[#080604] scanlines">
 
-    <!-- ASCII Art Header Banner -->
-    <header class="w-full max-w-4xl text-center my-1">
-        <pre class="text-[9px] sm:text-xs md:text-sm leading-none text-amber-500 font-bold glow-amber overflow-x-auto whitespace-pre">
-+------------------------------------------------------------------------+
-|   ██████╗ ██████╗ ██████╗ ████████╗██████╗     ███╗   ███╗ █████╗     |
-|  ██╔════╝██╔═══██╗██╔══██╗╚══██╔══╝██╔══██╗    ████╗ ████║██╔══██╗    |
-|  ██║     ██║   ██║██████╔╝   ██║   ███████║    ██╔████╔██║███████║    |
-|  ██║     ██║   ██║██╔══██╗   ██║   ██╔══██║    ██║╚██╔╝██║██╔══██║    |
-|  ╚██████╗╚██████╔╝██║  ██║   ██║   ██║  ██║    ██║ ╚═╝ ██║██║  ██║    |
-|   ╚═════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝    ╚═╝     ╚═╝╚═╝  ╚═╝    |
-|               [ C O R T A   M A D E R A   A S C I I ]                  |
-+------------------------------------------------------------------------+</pre>
+    <!-- Compact Header -->
+    <header class="w-full text-center shrink-0">
+        <div class="text-amber-500 font-bold text-xs sm:text-sm tracking-wider glow-amber flex justify-between items-center px-1">
+            <span>[░▒▓ CORTA MADERA ASCII ▓▒░]</span>
+            <span id="targetName" class="text-emerald-400 text-[11px] sm:text-xs font-semibold">[ FIGURA 1/10: RAMPA ]</span>
+        </div>
     </header>
 
-    <!-- Game HUD (No numeric score/points) -->
-    <section class="w-full max-w-4xl ascii-box rounded-lg p-2 sm:p-3 my-2 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+    <!-- Mobile-Optimized HUD Dashboard (Fits comfortably without scroll) -->
+    <section class="w-full ascii-box rounded-md p-1.5 shrink-0 my-1 grid grid-cols-2 sm:grid-cols-4 gap-1 text-[11px] sm:text-xs">
         <!-- Figures Count -->
-        <div class="flex items-center gap-2">
-            <span class="text-neutral-400 font-bold">FIGURAS:</span>
-            <span id="figuresCount" class="text-emerald-400 font-bold text-base glow-green">00</span>
+        <div class="flex items-center justify-between bg-[#0b0704] px-2 py-1 rounded border border-amber-900/50">
+            <span class="text-neutral-400 font-bold">COMPLETADAS:</span>
+            <span id="figuresCount" class="text-emerald-400 font-bold glow-green text-sm">00</span>
+        </div>
+
+        <!-- Remaining Cuts -->
+        <div class="flex items-center justify-between bg-[#0b0704] px-2 py-1 rounded border border-amber-900/50">
+            <span class="text-neutral-400 font-bold">CORTES:</span>
+            <div class="flex items-center gap-1">
+                <span id="cutsBar" class="text-amber-400 font-bold text-xs">████</span>
+                <span id="cutsVal" class="text-amber-300 font-bold">4/4</span>
+            </div>
         </div>
 
         <!-- Accuracy -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-between bg-[#0b0704] px-2 py-1 rounded border border-amber-900/50">
             <span class="text-neutral-400 font-bold">PRECISIÓN:</span>
-            <span id="accuracyVal" class="text-cyan-400 font-bold text-base">0%</span>
-            <span class="text-neutral-500 text-[10px]">(META: ≥88%)</span>
+            <span id="accuracyVal" class="text-cyan-400 font-bold text-sm">0%</span>
         </div>
 
-        <!-- Crusher Safety Buffer -->
-        <div class="flex items-center gap-2">
-            <span class="text-amber-400 font-bold">MARGEN SEGURIDAD:</span>
-            <span id="crusherBar" class="text-emerald-400 tracking-tighter text-xs font-bold">[██████████]</span>
+        <!-- Crusher Safety Distance -->
+        <div class="flex items-center justify-between bg-[#0b0704] px-2 py-1 rounded border border-amber-900/50">
+            <span class="text-amber-400 font-bold">SEGURIDAD:</span>
             <span id="crusherPercent" class="text-emerald-400 font-bold text-xs">100%</span>
-        </div>
-
-        <!-- Audio & Help Controls -->
-        <div class="flex items-center gap-2">
-            <button id="soundToggleBtn" class="ascii-btn px-2 py-1 text-xs rounded">
-                [ 🔊 SONIDO ]
-            </button>
-            <button id="helpBtn" class="ascii-btn ascii-btn-green px-2 py-1 text-xs rounded">
-                [ ? AYUDA ]
-            </button>
         </div>
     </section>
 
-    <main class="w-full max-w-4xl flex flex-col md:flex-row items-center justify-center gap-4 my-2">
+    <!-- Main Interactive Area -->
+    <main class="w-full flex-1 min-h-0 flex flex-row items-center justify-center gap-2 my-1 overflow-hidden">
         
-        <!-- Target Figure Canvas -->
-        <div class="flex flex-col items-center ascii-box p-3 rounded-lg w-full md:w-1/3 min-w-[250px]">
-            <div class="text-amber-400 text-xs font-bold mb-1 tracking-widest text-center">
-                +-- OBJETIVO ASCII --+
+        <!-- Target Figure Preview (Compact side bar on mobile / side panel on desktop) -->
+        <div class="ascii-box p-1.5 rounded-md flex flex-col items-center justify-center h-full w-[28%] max-w-[130px] shrink-0">
+            <div class="text-amber-400 text-[10px] sm:text-xs font-bold text-center mb-1">OBJETIVO</div>
+            <div class="bg-[#090604] p-1 rounded border border-amber-900/60 flex items-center justify-center aspect-square w-full">
+                <canvas id="targetCanvas" width="128" height="128" class="w-full h-full object-contain"></canvas>
             </div>
-            <div id="targetName" class="text-emerald-400 text-xs font-bold mb-2">[ 1/10: RAMPA ]</div>
-            
-            <div class="bg-[#090604] p-2 rounded border border-amber-900/60 shadow-inner">
-                <canvas id="targetCanvas" width="220" height="220" class="block"></canvas>
-            </div>
-            
-            <div class="text-neutral-400 text-[11px] mt-2 text-center">
-                CORTES: <span class="text-emerald-400 font-bold">1 A 3 CORTES LIMPIOS</span>
+            <div class="text-emerald-400 text-[9px] mt-1 text-center font-semibold leading-tight">
+                META: ≥78%
             </div>
         </div>
 
-        <!-- Interactive Workshop Canvas -->
-        <div id="workshopBox" class="flex flex-col items-center ascii-box p-3 rounded-lg w-full md:w-2/3">
-            <div class="text-amber-400 text-xs font-bold mb-1 tracking-widest text-center flex justify-between w-full px-2">
-                <span>+-- TALLER DE TALLA --+</span>
-                <span class="text-emerald-400 text-[10px]">▼ DESCENSO LENTO ▼</span>
+        <!-- Interactive Workshop Canvas (Main Game) -->
+        <div id="workshopBox" class="ascii-box p-1.5 rounded-md flex-1 h-full max-w-[380px] flex flex-col items-center justify-between overflow-hidden">
+            <div class="text-amber-400 text-[10px] sm:text-xs font-bold tracking-widest text-center w-full flex justify-between px-1 shrink-0">
+                <span>TALLER</span>
+                <span class="text-emerald-400 text-[9px]">▼ TRITURADORA LENTA ▼</span>
             </div>
 
-            <div class="relative w-full max-w-[352px] aspect-square bg-[#080503] border-2 border-amber-800/80 rounded shadow-2xl overflow-hidden flex items-center justify-center">
+            <!-- Square Workspace Container -->
+            <div class="relative w-full aspect-square max-h-[82dvh] bg-[#080503] border border-amber-800/80 rounded overflow-hidden flex items-center justify-center my-auto">
                 <!-- Swipe Hint Overlay -->
                 <div id="canvasHelpHint" class="absolute top-2 inset-x-0 text-center pointer-events-none z-20 transition-opacity duration-300">
-                    <span class="bg-black/85 text-amber-300 text-[11px] px-3 py-1 rounded border border-amber-700/60 shadow">
-                        Desliza para cortar trozos de madera
+                    <span class="bg-black/90 text-amber-300 text-[10px] px-2 py-0.5 rounded border border-amber-700/60 shadow">
+                        Desliza con el dedo para cortar
+                    </span>
+                </div>
+
+                <!-- Toast Banner for Resets/Warnings -->
+                <div id="toastBanner" class="absolute top-1/2 inset-x-2 -translate-y-1/2 text-center pointer-events-none z-30 opacity-0 transition-opacity duration-300">
+                    <span id="toastText" class="bg-amber-950/95 text-amber-300 font-bold text-xs px-3 py-2 rounded border border-amber-500 shadow-2xl block">
+                        ¡Cortes agotados! Reiniciando figura...
                     </span>
                 </div>
 
                 <!-- Canvas -->
-                <canvas id="workshopCanvas" width="352" height="352" class="w-full h-full cursor-crosshair touch-none"></canvas>
-            </div>
-
-            <!-- Action Controls -->
-            <div class="flex flex-wrap items-center justify-center gap-2 mt-3 w-full">
-                <button id="resetWoodBtn" class="ascii-btn px-3 py-1 text-xs rounded">
-                    [ ↻ REINICIAR BLOQUE ]
-                </button>
-                <button id="skipBtn" class="ascii-btn px-3 py-1 text-xs rounded">
-                    [ ⏭ SIGUIENTE FIGURA ]
-                </button>
+                <canvas id="workshopCanvas" width="320" height="320" class="w-full h-full cursor-crosshair touch-none"></canvas>
             </div>
         </div>
     </main>
 
+    <!-- Bottom Action Controls -->
+    <footer class="w-full shrink-0 my-1 flex items-center justify-between gap-2">
+        <button id="resetWoodBtn" class="ascii-btn px-2.5 py-1.5 text-xs rounded flex-1">
+            [ ↻ REINICIAR ]
+        </button>
+        <button id="soundToggleBtn" class="ascii-btn px-2 py-1.5 text-xs rounded">
+            [ 🔊 SONIDO ]
+        </button>
+        <button id="helpBtn" class="ascii-btn ascii-btn-green px-2.5 py-1.5 text-xs rounded">
+            [ ? AYUDA ]
+        </button>
+    </footer>
+
     <!-- Tutorial Modal -->
-    <div id="helpModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="ascii-box p-5 rounded-lg max-w-lg w-full text-xs sm:text-sm">
-            <div class="text-amber-400 font-bold text-center text-sm mb-3">
-                +----------------------------------------+<br>
-                |       ¿CÓMO JUGAR CORTA MADERA?        |<br>
-                +----------------------------------------+
+    <div id="helpModal" class="fixed inset-0 bg-black/92 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
+        <div class="ascii-box p-4 rounded-lg max-w-sm w-full text-xs space-y-2.5">
+            <div class="text-amber-400 font-bold text-center text-sm border-b border-amber-800 pb-1">
+                ¿CÓMO JUGAR CORTA MADERA?
             </div>
             
-            <div class="space-y-3 text-neutral-300 leading-relaxed">
+            <div class="space-y-2 text-neutral-300 leading-normal">
                 <p>
-                    <strong class="text-amber-400">1. CORTE CON DESLIZAMIENTO:</strong><br>
-                    Mantiene pulsado y arrastra el ratón o dedo para trazar una línea de corte sobre el bloque de madera. Las partes cortadas caerán solas.
+                    <strong class="text-amber-400">1. DESLIZA PARA CORTAR:</strong><br>
+                    Arrastra el dedo para trazar una línea y recortar la madera. Las piezas sueltas caerán solas.
                 </p>
                 <p>
-                    <strong class="text-emerald-400">2. MARGEN DE SEGURIDAD (~15 SEGUNDOS):</strong><br>
-                    El bloque comienza arriba con suficiente tiempo libre para realizar tus cortes con tranquilidad.
+                    <strong class="text-emerald-400">2. HASTA 4 CORTES PERMITIDOS:</strong><br>
+                    Tienes <strong class="text-amber-300">4 intentos de corte</strong> por figura. Si logras al menos un <strong class="text-cyan-400">78% de precisión</strong> en cualquier corte, ganas la figura.
                 </p>
                 <p>
-                    <strong class="text-red-400">3. TRITURADORA INFERIOR:</strong><br>
-                    Evita que la parte inferior de la figura llegue a la línea <span class="text-red-400">▲▲▲ TRITURADORA ▲▲▲</span>.
+                    <strong class="text-amber-400">3. REINICIO DE INTENTOS:</strong><br>
+                    Si gastas los 4 cortes sin llegar al 78%, la figura se reinicia para que lo vuelvas a intentar.
                 </p>
                 <p>
-                    <strong class="text-cyan-400">4. COMPLETAR FIGURAS:</strong><br>
-                    Alcanza al menos un <strong class="text-emerald-400">88% de precisión</strong> para pasar automáticamente a la siguiente figura y resetear la altura al 100%.
+                    <strong class="text-red-400">4. TRITURADORA LENTA:</strong><br>
+                    Cuentas con un margen de 18-20 segundos antes de que la madera toque los dientes inferiores.
                 </p>
             </div>
 
-            <div class="mt-5 text-center">
-                <button id="closeHelpBtn" class="ascii-btn ascii-btn-green px-6 py-2 text-sm font-bold rounded">
+            <div class="pt-2 text-center">
+                <button id="closeHelpBtn" class="ascii-btn ascii-btn-green px-5 py-1.5 text-xs font-bold rounded w-full">
                     [ ¡ENTENDIDO! ]
                 </button>
             </div>
@@ -226,24 +214,23 @@
     </div>
 
     <!-- Game Over Modal -->
-    <div id="gameOverModal" class="fixed inset-0 bg-black/92 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="ascii-box p-6 rounded-lg max-w-md w-full text-center">
-            <pre class="text-red-500 font-bold text-[10px] sm:text-xs leading-none mb-3 glow-red overflow-hidden">
-   ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-   │  ¡MADERA TRITURADA!    │
-   │  ===================   │
-   ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲</pre>
+    <div id="gameOverModal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 hidden flex items-center justify-center p-3">
+        <div class="ascii-box p-5 rounded-lg max-w-xs w-full text-center">
+            <pre class="text-red-500 font-bold text-[10px] leading-tight mb-2 glow-red overflow-hidden">
+▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+│  ¡MADERA TRITURADA!  │
+▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲</pre>
 
-            <div class="text-emerald-400 font-bold text-xl mb-2 glow-green" id="finalFiguresText">
+            <div class="text-emerald-400 font-bold text-lg my-3 glow-green" id="finalFiguresText">
                 FIGURAS COMPLETADAS: 00
             </div>
 
-            <div class="text-neutral-300 text-xs mb-6 space-y-2 bg-[#0f0a06] p-3 rounded border border-amber-900/60">
+            <div class="text-neutral-300 text-xs mb-4 space-y-1 bg-[#0f0a06] p-2.5 rounded border border-amber-900/60">
                 <div>PRECISIÓN PROMEDIO: <span id="finalAvgAcc" class="text-cyan-400 font-bold">0%</span></div>
                 <div>CORTES REALIZADOS: <span id="finalCutsCount" class="text-amber-400 font-bold">0</span></div>
             </div>
 
-            <button id="restartGameBtn" class="ascii-btn ascii-btn-green px-6 py-3 text-sm font-bold rounded shadow-lg">
+            <button id="restartGameBtn" class="ascii-btn ascii-btn-green px-5 py-2 text-xs font-bold rounded w-full shadow-lg">
                 [ ↻ REINTENTAR TALLER ]
             </button>
         </div>
@@ -281,10 +268,10 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(240, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(70, this.ctx.currentTime + 0.04);
+                osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.04);
 
-                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
 
                 osc.connect(gain);
@@ -299,7 +286,7 @@
                 if (!this.ctx || this.sawOsc) return;
 
                 try {
-                    const bufferSize = this.ctx.sampleRate * 0.1;
+                    const bufferSize = this.ctx.sampleRate * 0.08;
                     const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
                     const output = noiseBuffer.getChannelData(0);
                     for (let i = 0; i < bufferSize; i++) {
@@ -312,11 +299,11 @@
 
                     const filter = this.ctx.createBiquadFilter();
                     filter.type = 'bandpass';
-                    filter.frequency.value = 950;
-                    filter.Q.value = 2.8;
+                    filter.frequency.value = 900;
+                    filter.Q.value = 2.5;
 
                     this.sawGain = this.ctx.createGain();
-                    this.sawGain.gain.setValueAtTime(0.09, this.ctx.currentTime);
+                    this.sawGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
 
                     this.sawNoise.connect(filter);
                     filter.connect(this.sawGain);
@@ -345,16 +332,59 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(320, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(340, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.07);
 
-                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.07);
 
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
                 osc.start();
-                osc.stop(this.ctx.currentTime + 0.08);
+                osc.stop(this.ctx.currentTime + 0.07);
+            }
+
+            playSuccess() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+
+                    const startTime = this.ctx.currentTime + idx * 0.05;
+                    gain.gain.setValueAtTime(0.15, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.18);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.18);
+                });
+            }
+
+            playResetWarning() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.15);
+
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
             }
 
             playCrushCrunch() {
@@ -377,29 +407,6 @@
                 osc.stop(this.ctx.currentTime + 0.15);
             }
 
-            playSuccess() {
-                if (!this.enabled) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                notes.forEach((freq, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.value = freq;
-
-                    const startTime = this.ctx.currentTime + idx * 0.06;
-                    gain.gain.setValueAtTime(0.18, startTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.2);
-
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start(startTime);
-                    osc.stop(startTime + 0.2);
-                });
-            }
-
             playAlarm() {
                 if (!this.enabled) return;
                 this.init();
@@ -408,16 +415,16 @@
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
-                osc.frequency.setValueAtTime(400, this.ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(750, this.ctx.currentTime);
+                osc.frequency.setValueAtTime(380, this.ctx.currentTime + 0.08);
 
-                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.16);
+                gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
 
                 osc.connect(gain);
                 gain.connect(this.ctx.destination);
                 osc.start();
-                osc.stop(this.ctx.currentTime + 0.16);
+                osc.stop(this.ctx.currentTime + 0.15);
             }
         }
 
@@ -426,8 +433,10 @@
         // Grid setup: 16 cols x 16 rows
         const GRID_COLS = 16;
         const GRID_ROWS = 16;
+        const MAX_CUTS_PER_FIGURE = 4;
+        const WIN_ACCURACY_THRESHOLD = 78; // Permissive accuracy goal!
 
-        // Base Wood Block positioned high up in the workspace (rows 1..10)
+        // Base Wood Block positioned in middle-top (rows 1..10)
         const BASE_BLOCK = {
             rStart: 1,
             rEnd: 10,
@@ -435,10 +444,10 @@
             cEnd: 12
         };
 
-        // 10 EASY, SOLID TARGET FIGURES WITHOUT HOLES
+        // 10 EASY, SOLID TARGET FIGURES
         const TARGET_FIGURES = [
             {
-                name: "RAMPA / DIAGONAL",
+                name: "RAMPA DIAGONAL",
                 grid: [
                     "                ",
                     "   ██           ",
@@ -522,7 +531,7 @@
                 ]
             },
             {
-                name: "ESCALÓN / MARCHA",
+                name: "ESCALÓN DERECHO",
                 grid: [
                     "                ",
                     "   ██████████   ",
@@ -654,14 +663,15 @@
         let figuresCompleted = 0;
         let totalAccuracySum = 0;
         let totalCutsMade = 0;
+        let cutsRemaining = MAX_CUTS_PER_FIGURE;
 
         let playerGrid = [];
 
-        // Descent & Crusher physics variables
-        let woodYOffset = 0; // Vertical shift in pixels
-        const descentSpeed = 0.08; // Very slow descent (~15 seconds of safe margin)
-        const CRUSHER_Y_LIMIT = 300; // Y limit where crusher teeth sit
-        const INITIAL_MAX_GAP = 60; // Initial distance gap to crusher
+        // Crusher descent physics (Very slow: ~18-20s safe window)
+        let woodYOffset = 0;
+        const descentSpeed = 0.055; 
+        const CRUSHER_Y_LIMIT = 272; // Y pixel position of crusher
+        const INITIAL_MAX_GAP = 60;
 
         let isDragging = false;
         let currentCutLine = { start: null, end: null };
@@ -675,12 +685,14 @@
         const targetCanvas = document.getElementById('targetCanvas');
         const tgCtx = targetCanvas.getContext('2d');
 
-        const CELL_W = workshopCanvas.width / GRID_COLS; // 22px
-        const CELL_H = workshopCanvas.height / GRID_ROWS; // 22px
+        const CELL_W = workshopCanvas.width / GRID_COLS; // 20px
+        const CELL_H = workshopCanvas.height / GRID_ROWS; // 20px
 
         function initPlayerWood() {
             playerGrid = Array(GRID_ROWS).fill(null).map(() => Array(GRID_COLS).fill(' '));
-            woodYOffset = 0; // Reset height to top with full safe buffer!
+            woodYOffset = 0;
+            cutsRemaining = MAX_CUTS_PER_FIGURE;
+            updateCutsHUD();
 
             for (let r = BASE_BLOCK.rStart; r <= BASE_BLOCK.rEnd; r++) {
                 for (let c = BASE_BLOCK.cStart; c <= BASE_BLOCK.cEnd; c++) {
@@ -692,6 +704,13 @@
             }
         }
 
+        function updateCutsHUD() {
+            document.getElementById('cutsVal').innerText = `${cutsRemaining}/${MAX_CUTS_PER_FIGURE}`;
+            const filled = '█'.repeat(cutsRemaining);
+            const empty = '░'.repeat(MAX_CUTS_PER_FIGURE - cutsRemaining);
+            document.getElementById('cutsBar').innerText = filled + empty;
+        }
+
         function renderTargetCanvas() {
             tgCtx.fillStyle = '#090604';
             tgCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
@@ -700,7 +719,7 @@
             const cellW = targetCanvas.width / GRID_COLS;
             const cellH = targetCanvas.height / GRID_ROWS;
 
-            tgCtx.font = '13px "Fira Code", monospace';
+            tgCtx.font = '10px "Fira Code", monospace';
             tgCtx.textAlign = 'center';
             tgCtx.textBaseline = 'middle';
 
@@ -709,7 +728,7 @@
                     const char = fig.grid[r][c];
                     if (char !== ' ') {
                         tgCtx.fillStyle = '#78350f';
-                        tgCtx.fillRect(c * cellW + 1, r * cellH + 1, cellW - 2, cellH - 2);
+                        tgCtx.fillRect(c * cellW + 0.5, r * cellH + 0.5, cellW - 1, cellH - 1);
 
                         tgCtx.fillStyle = '#f59e0b';
                         tgCtx.fillText('█', c * cellW + cellW / 2, r * cellH + cellH / 2);
@@ -718,10 +737,21 @@
             }
         }
 
+        // Exact touch/pointer position mapping with Canvas scale factor
         function getCanvasPos(e) {
             const rect = workshopCanvas.getBoundingClientRect();
-            const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+            let clientX, clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                clientX = e.changedTouches[0].clientX;
+                clientY = e.changedTouches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
 
             const scaleX = workshopCanvas.width / rect.width;
             const scaleY = workshopCanvas.height / rect.height;
@@ -741,7 +771,7 @@
             for (let i = 0; i <= steps; i++) {
                 const t = i / steps;
                 const px = p1.x + t * (p2.x - p1.x);
-                const py = p1.y + t * (p2.y - p1.y) - woodYOffset; // Adjust for vertical shift
+                const py = p1.y + t * (p2.y - p1.y) - woodYOffset;
 
                 const c = Math.floor(px / CELL_W);
                 const r = Math.floor(py / CELL_H);
@@ -764,14 +794,17 @@
                 currentCutLine.end.x - currentCutLine.start.x,
                 currentCutLine.end.y - currentCutLine.start.y
             );
-            if (dist < 15) return;
+            if (dist < 12) return;
 
+            if (cutsRemaining <= 0) return;
+
+            cutsRemaining--;
             totalCutsMade++;
+            updateCutsHUD();
             sound.playCutRelease();
 
             const cutCells = getCellsOnLine(currentCutLine.start, currentCutLine.end);
 
-            // Erase wood cells along the cut line
             cutCells.forEach(cell => {
                 if (playerGrid[cell.r][cell.c] !== ' ') {
                     spawnSawdustBurst(cell.c, cell.r, 3, woodYOffset);
@@ -779,9 +812,49 @@
                 }
             });
 
-            // Perform connectivity flood-fill to drop disconnected offcuts
             checkAndDetachPieces();
-            calculateAccuracy();
+            const currentAcc = calculateAccuracy();
+
+            // Win condition (>= 78% accuracy)
+            if (currentAcc >= WIN_ACCURACY_THRESHOLD && isGameRunning) {
+                sound.playSuccess();
+                figuresCompleted++;
+                totalAccuracySum += currentAcc;
+
+                document.getElementById('figuresCount').innerText = String(figuresCompleted).padStart(2, '0');
+
+                showToast("¡FIGURA COMPLETADA!", "text-emerald-300 border-emerald-500 bg-emerald-950/95");
+
+                isGameRunning = false;
+                setTimeout(() => {
+                    currentLevelIdx++;
+                    loadLevel(currentLevelIdx);
+                    isGameRunning = true;
+                }, 650);
+            } 
+            // If cuts run out without reaching 78% accuracy -> auto reset figure
+            else if (cutsRemaining <= 0 && isGameRunning) {
+                sound.playResetWarning();
+                showToast("¡Cortes agotados! Reiniciando...", "text-amber-300 border-amber-500 bg-amber-950/95");
+
+                setTimeout(() => {
+                    initPlayerWood();
+                    calculateAccuracy();
+                }, 750);
+            }
+        }
+
+        function showToast(msg, colorClass) {
+            const toast = document.getElementById('toastBanner');
+            const text = document.getElementById('toastText');
+            if (toast && text) {
+                text.innerText = msg;
+                text.className = `font-bold text-xs px-3 py-2 rounded border shadow-2xl block ${colorClass}`;
+                toast.style.opacity = '1';
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                }, 1200);
+            }
         }
 
         function checkAndDetachPieces() {
@@ -820,7 +893,6 @@
                 }
             }
 
-            // Keep largest component attached, drop floating offcuts
             if (components.length > 1) {
                 components.sort((a, b) => b.length - a.length);
 
@@ -834,8 +906,8 @@
                         })),
                         x: 0,
                         y: woodYOffset,
-                        vx: (Math.random() - 0.5) * 2.5,
-                        vy: Math.random() * 2 + 1.5
+                        vx: (Math.random() - 0.5) * 2.2,
+                        vy: Math.random() * 1.8 + 1.2
                     };
 
                     fallingWoodPieces.push(pieceObj);
@@ -853,8 +925,8 @@
                 sawdustParticles.push({
                     x: (gridCol + 0.5) * CELL_W,
                     y: (gridRow + 0.5) * CELL_H + yOffset,
-                    vx: (Math.random() - 0.5) * 5,
-                    vy: (Math.random() - 0.5) * 5 - 2,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4 - 1.5,
                     char: symbols[Math.floor(Math.random() * symbols.length)],
                     color: Math.random() > 0.4 ? '#f59e0b' : '#d97706',
                     life: 1.0
@@ -883,23 +955,6 @@
             const accuracy = maxSolid > 0 ? Math.round((overlapSolid / maxSolid) * 100) : 100;
 
             document.getElementById('accuracyVal').innerText = accuracy + '%';
-
-            // Auto-advance level when precision >= 88%
-            if (accuracy >= 88 && isGameRunning) {
-                sound.playSuccess();
-                figuresCompleted++;
-                totalAccuracySum += accuracy;
-
-                document.getElementById('figuresCount').innerText = String(figuresCompleted).padStart(2, '0');
-
-                isGameRunning = false;
-                setTimeout(() => {
-                    currentLevelIdx++;
-                    loadLevel(currentLevelIdx);
-                    isGameRunning = true;
-                }, 600);
-            }
-
             return accuracy;
         }
 
@@ -907,11 +962,9 @@
             wsCtx.fillStyle = '#080503';
             wsCtx.fillRect(0, 0, workshopCanvas.width, workshopCanvas.height);
 
-            // Update vertical descent
             if (isGameRunning) {
                 woodYOffset += descentSpeed;
 
-                // Find lowest row with solid wood
                 let lowestRow = -1;
                 for (let r = GRID_ROWS - 1; r >= 0; r--) {
                     if (playerGrid[r].some(c => c !== ' ')) {
@@ -924,31 +977,18 @@
                     const lowestY = (lowestRow + 1) * CELL_H + woodYOffset;
                     const distToCrusher = Math.max(0, CRUSHER_Y_LIMIT - lowestY);
 
-                    // Compute safety percentage
                     const safePercent = Math.min(100, Math.max(0, Math.round((distToCrusher / INITIAL_MAX_GAP) * 100)));
                     document.getElementById('crusherPercent').innerText = safePercent + '%';
 
-                    // Update Crusher Safety Bar
-                    const totalBars = 10;
-                    const filled = Math.min(totalBars, Math.max(0, Math.round((safePercent / 100) * totalBars)));
-                    const barStr = '[' + '█'.repeat(filled) + '░'.repeat(totalBars - filled) + ']';
-                    
-                    const crusherEl = document.getElementById('crusherBar');
-                    crusherEl.innerText = barStr;
-
-                    if (safePercent <= 25) {
-                        crusherEl.className = 'text-red-500 tracking-tighter text-xs font-bold animate-pulse glow-red';
-                        document.getElementById('crusherPercent').className = 'text-red-500 font-bold text-xs glow-red';
-                        if (Math.random() < 0.04) sound.playAlarm();
+                    if (safePercent <= 20) {
+                        document.getElementById('crusherPercent').className = 'text-red-500 font-bold text-xs animate-pulse glow-red';
+                        if (Math.random() < 0.03) sound.playAlarm();
                     } else if (safePercent <= 50) {
-                        crusherEl.className = 'text-amber-400 tracking-tighter text-xs font-bold';
                         document.getElementById('crusherPercent').className = 'text-amber-400 font-bold text-xs';
                     } else {
-                        crusherEl.className = 'text-emerald-400 tracking-tighter text-xs font-bold';
                         document.getElementById('crusherPercent').className = 'text-emerald-400 font-bold text-xs';
                     }
 
-                    // Check if wood reaches the crusher teeth!
                     if (lowestY >= CRUSHER_Y_LIMIT) {
                         sound.playCrushCrunch();
                         endGame();
@@ -967,7 +1007,7 @@
             }
 
             // Draw Main Wood Block
-            wsCtx.font = '16px "Fira Code", monospace';
+            wsCtx.font = '14px "Fira Code", monospace';
             wsCtx.textAlign = 'center';
             wsCtx.textBaseline = 'middle';
 
@@ -979,7 +1019,7 @@
                     const char = playerGrid[r][c];
                     if (char !== ' ') {
                         wsCtx.fillStyle = '#d97706';
-                        wsCtx.fillRect(c * CELL_W + 1, r * CELL_H + 1, CELL_W - 2, CELL_H - 2);
+                        wsCtx.fillRect(c * CELL_W + 0.5, r * CELL_H + 0.5, CELL_W - 1, CELL_H - 1);
 
                         wsCtx.fillStyle = '#78350f';
                         wsCtx.fillText(char, (c + 0.5) * CELL_W, (r + 0.5) * CELL_H);
@@ -989,12 +1029,12 @@
 
             wsCtx.restore();
 
-            // Render Falling Offcuts into Crusher
+            // Render Falling Offcuts
             for (let i = fallingWoodPieces.length - 1; i >= 0; i--) {
                 const piece = fallingWoodPieces[i];
                 piece.y += piece.vy;
                 piece.x += piece.vx;
-                piece.vy += 0.35; // Gravity
+                piece.vy += 0.3;
 
                 wsCtx.save();
                 wsCtx.fillStyle = '#b45309';
@@ -1004,11 +1044,10 @@
                     const py = (cell.r + 0.5) * CELL_H + piece.y;
 
                     if (py < CRUSHER_Y_LIMIT) {
-                        wsCtx.fillRect(px - CELL_W / 2, py - CELL_H / 2, CELL_W - 2, CELL_H - 2);
+                        wsCtx.fillRect(px - CELL_W / 2, py - CELL_H / 2, CELL_W - 1, CELL_H - 1);
                         wsCtx.fillStyle = '#f59e0b';
                         wsCtx.fillText(cell.char, px, py);
                     } else {
-                        // Crushed in teeth!
                         sound.playCrushCrunch();
                         spawnSawdustBurst(cell.c, cell.r, 2, piece.y);
                     }
@@ -1030,24 +1069,24 @@
 
                 wsCtx.fillStyle = p.color;
                 wsCtx.globalAlpha = Math.max(0, p.life);
-                wsCtx.font = '12px "Fira Code", monospace';
+                wsCtx.font = '11px "Fira Code", monospace';
                 wsCtx.fillText(p.char, p.x, p.y);
                 wsCtx.globalAlpha = 1.0;
 
                 if (p.life <= 0) sawdustParticles.splice(i, 1);
             }
 
-            // Render Bottom Crusher Belt Teeth (`▲▲▲ TRITURADORA ▲▲▲`)
+            // Render Crusher Teeth
             wsCtx.fillStyle = '#ef4444';
             wsCtx.fillRect(0, CRUSHER_Y_LIMIT, workshopCanvas.width, workshopCanvas.height - CRUSHER_Y_LIMIT);
 
             wsCtx.fillStyle = '#7f1d1d';
-            wsCtx.font = 'bold 13px "Fira Code", monospace';
+            wsCtx.font = 'bold 11px "Fira Code", monospace';
             wsCtx.textAlign = 'center';
-            wsCtx.fillText('▲▲▲▲▲▲ TRITURADORA ▲▲▲▲▲▲', workshopCanvas.width / 2, CRUSHER_Y_LIMIT + 14);
-            wsCtx.fillText('█████████████████████████', workshopCanvas.width / 2, CRUSHER_Y_LIMIT + 32);
+            wsCtx.fillText('▲▲▲▲ TRITURADORA ▲▲▲▲', workshopCanvas.width / 2, CRUSHER_Y_LIMIT + 12);
+            wsCtx.fillText('██████████████████████', workshopCanvas.width / 2, CRUSHER_Y_LIMIT + 28);
 
-            // Render Active Cutting Line & Saw Cursor
+            // Active Cut Line
             if (isDragging && currentCutLine.start && currentCutLine.end) {
                 wsCtx.beginPath();
                 wsCtx.moveTo(currentCutLine.start.x, currentCutLine.start.y);
@@ -1057,13 +1096,12 @@
                 wsCtx.lineWidth = 3;
                 wsCtx.lineCap = 'round';
                 wsCtx.shadowColor = '#ef4444';
-                wsCtx.shadowBlur = 8;
+                wsCtx.shadowBlur = 6;
                 wsCtx.stroke();
                 wsCtx.shadowBlur = 0;
 
-                // Saw blade star icon
                 wsCtx.fillStyle = '#ffffff';
-                wsCtx.font = '18px "Fira Code", monospace';
+                wsCtx.font = '16px "Fira Code", monospace';
                 wsCtx.fillText('*', currentCutLine.end.x, currentCutLine.end.y);
             }
 
@@ -1071,7 +1109,8 @@
         }
 
         function onPointerDown(e) {
-            if (!isGameRunning) return;
+            if (!isGameRunning || cutsRemaining <= 0) return;
+            e.preventDefault();
             sound.init();
             sound.startSawing();
             isDragging = true;
@@ -1086,6 +1125,7 @@
 
         function onPointerMove(e) {
             if (!isDragging || !isGameRunning) return;
+            e.preventDefault();
             const pos = getCanvasPos(e);
             currentCutLine.end = pos;
 
@@ -1098,6 +1138,7 @@
 
         function onPointerUp(e) {
             if (!isDragging) return;
+            e.preventDefault();
             isDragging = false;
             sound.stopSawing();
 
@@ -1105,14 +1146,15 @@
             currentCutLine = { start: null, end: null };
         }
 
-        workshopCanvas.addEventListener('pointerdown', onPointerDown);
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('pointercancel', onPointerUp);
+        // Touch & Pointer Bindings
+        workshopCanvas.addEventListener('pointerdown', onPointerDown, { passive: false });
+        window.addEventListener('pointermove', onPointerMove, { passive: false });
+        window.addEventListener('pointerup', onPointerUp, { passive: false });
+        window.addEventListener('pointercancel', onPointerUp, { passive: false });
 
         function loadLevel(idx) {
             const fig = TARGET_FIGURES[idx % TARGET_FIGURES.length];
-            document.getElementById('targetName').innerText = `[ ${idx + 1}/${TARGET_FIGURES.length}: ${fig.name} ]`;
+            document.getElementById('targetName').innerText = `[ FIGURA ${idx + 1}/${TARGET_FIGURES.length}: ${fig.name} ]`;
 
             initPlayerWood();
             renderTargetCanvas();
@@ -1146,17 +1188,11 @@
             modal.classList.add('flex');
         }
 
-        // Button Controls
+        // Button Listeners
         document.getElementById('resetWoodBtn').addEventListener('click', () => {
             sound.playClick();
             initPlayerWood();
             calculateAccuracy();
-        });
-
-        document.getElementById('skipBtn').addEventListener('click', () => {
-            sound.playClick();
-            currentLevelIdx++;
-            loadLevel(currentLevelIdx);
         });
 
         document.getElementById('soundToggleBtn').addEventListener('click', () => {
