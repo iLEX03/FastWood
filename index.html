@@ -1,1226 +1,746 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Corta Madera ASCII - Mobile Edition</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Corta Madera ASCII</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+      touch-action: none;
+    }
 
-        :root {
-            --bg-term: #080604;
-            --wood-amber: #f59e0b;
-            --wood-dark: #78350f;
-            --wood-light: #fbbf24;
-            --term-green: #10b981;
-            --term-cyan: #06b6d4;
-            --term-red: #ef4444;
-        }
+    body {
+      background-color: #0d0c0a;
+      color: #ffb834;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+    }
 
-        body {
-            font-family: 'Fira Code', 'Courier New', monospace;
-            background-color: var(--bg-term);
-            color: #e5e7eb;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-            overflow: hidden;
-            height: 100dvh;
-            width: 100vw;
-        }
+    #app {
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: #14120e;
+      border: 2px solid #3d2f1d;
+      box-shadow: 0 0 20px rgba(255, 184, 52, 0.15);
+      position: relative;
+    }
 
-        /* CRT Scanline effect overlay */
-        .scanlines {
-            background: linear-gradient(
-                rgba(18, 16, 16, 0) 50%, 
-                rgba(0, 0, 0, 0.35) 50%
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-        }
+    header {
+      width: 100%;
+      text-align: center;
+      border-bottom: 1px dashed #5c4528;
+      padding-bottom: 4px;
+    }
 
-        .ascii-box {
-            border: 2px solid var(--wood-amber);
-            background-color: #140d08;
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.18), inset 0 0 6px rgba(0,0,0,0.9);
-        }
+    h1 {
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      color: #ffcc66;
+    }
 
-        .ascii-btn {
-            font-family: 'Fira Code', monospace;
-            background-color: #24160e;
-            border: 1.5px solid var(--wood-amber);
-            color: var(--wood-light);
-            transition: all 0.1s ease;
-            box-shadow: 2px 2px 0px var(--wood-dark);
-            touch-action: manipulation;
-        }
+    .hud-target {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #1d1812;
+      border: 1px solid #4a3820;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+    }
 
-        .ascii-btn:active {
-            transform: translate(1px, 1px);
-            box-shadow: 0px 0px 0px var(--wood-dark);
-            background-color: var(--wood-dark);
-            color: #ffffff;
-        }
+    .target-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        .ascii-btn-green {
-            border-color: var(--term-green);
-            color: var(--term-green);
-            box-shadow: 2px 2px 0px #064e3b;
-        }
-        .ascii-btn-green:active {
-            background-color: #065f46;
-            color: #ffffff;
-        }
+    .target-preview label {
+      font-size: 0.65rem;
+      color: #aaa;
+      margin-bottom: 2px;
+    }
 
-        .glow-amber { text-shadow: 0 0 8px rgba(245, 158, 11, 0.7); }
-        .glow-green { text-shadow: 0 0 8px rgba(16, 185, 129, 0.8); }
-        .glow-red { text-shadow: 0 0 8px rgba(239, 68, 68, 0.8); }
+    pre.ascii-target {
+      font-size: 0.7rem;
+      line-height: 0.7rem;
+      color: #55ff55;
+      background: #080808;
+      padding: 4px 6px;
+      border: 1px solid #225522;
+      border-radius: 3px;
+    }
 
-        canvas {
-            image-rendering: pixelated;
-            touch-action: none;
-        }
-    </style>
+    .hud-stats {
+      font-size: 0.75rem;
+      line-height: 1.3rem;
+    }
+
+    .stat-val {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .timer-container {
+      width: 100%;
+      margin: 8px 0;
+    }
+
+    .timer-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      margin-bottom: 2px;
+    }
+
+    .timer-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: #22180c;
+      border: 1px solid #ff5555;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .timer-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: #ff4444;
+      transition: width 0.1s linear, background-color 0.3s;
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #090806;
+      border: 2px solid #332615;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #000;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(10, 8, 5, 0.88);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #ffcc66;
+      text-align: center;
+      font-size: 1rem;
+      padding: 15px;
+      z-index: 20;
+    }
+
+    footer {
+      width: 100%;
+      margin-top: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2a1f14;
+      border: 1px solid #ffb834;
+      color: #ffb834;
+      font-family: inherit;
+      font-weight: bold;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:active {
+      background: #ffb834;
+      color: #000;
+    }
+  </style>
 </head>
-<body class="h-[100dvh] w-screen flex flex-col justify-between p-2 select-none overflow-hidden bg-[#080604] scanlines">
+<body>
 
-    <!-- Compact Header -->
-    <header class="w-full text-center shrink-0">
-        <div class="text-amber-500 font-bold text-xs sm:text-sm tracking-wider glow-amber flex justify-between items-center px-1">
-            <span>[░▒▓ CORTA MADERA ASCII ▓▒░]</span>
-            <span id="targetName" class="text-emerald-400 text-[11px] sm:text-xs font-semibold">[ FIGURA 1/10: RAMPA ]</span>
-        </div>
-    </header>
+<div id="app">
+  <header>
+    <h1>🪓 CORTA MADERA ASCII</h1>
+  </header>
 
-    <!-- Mobile-Optimized HUD Dashboard (Fits comfortably without scroll) -->
-    <section class="w-full ascii-box rounded-md p-1.5 shrink-0 my-1 grid grid-cols-2 sm:grid-cols-4 gap-1 text-[11px] sm:text-xs">
-        <!-- Figures Count -->
-        <div class="flex items-center justify-between bg-[#0b0704] px-2 py-1 rounded border border-amber-900/50">
-            <span class="text-neutral-400 font-bold">COMPLETADAS:</span>
-            <span id="figuresCount" class="text-emerald-400 font-bold glow-green text-sm">00</span>
-        </div>
-
-        <!-- Remaining Cuts -->
-        <div class="flex items-center justify-between bg-[#0b0704] px-2 py-1 rounded border border-amber-900/50">
-            <span class="text-neutral-400 font-bold">CORTES:</span>
-            <div class="flex items-center gap-1">
-                <span id="cutsBar" class="text-amber-400 font-bold text-xs">████</span>
-                <span id="cutsVal" class="text-amber-300 font-bold">4/4</span>
-            </div>
-        </div>
-
-        <!-- Accuracy -->
-        <div class="flex items-center justify-between bg-[#0b0704] px-2 py-1 rounded border border-amber-900/50">
-            <span class="text-neutral-400 font-bold">PRECISIÓN:</span>
-            <span id="accuracyVal" class="text-cyan-400 font-bold text-sm">0%</span>
-        </div>
-
-        <!-- Crusher Safety Distance -->
-        <div class="flex items-center justify-between bg-[#0b0704] px-2 py-1 rounded border border-amber-900/50">
-            <span class="text-amber-400 font-bold">SEGURIDAD:</span>
-            <span id="crusherPercent" class="text-emerald-400 font-bold text-xs">100%</span>
-        </div>
-    </section>
-
-    <!-- Main Interactive Area -->
-    <main class="w-full flex-1 min-h-0 flex flex-row items-center justify-center gap-2 my-1 overflow-hidden">
-        
-        <!-- Target Figure Preview (Compact side bar on mobile / side panel on desktop) -->
-        <div class="ascii-box p-1.5 rounded-md flex flex-col items-center justify-center h-full w-[28%] max-w-[130px] shrink-0">
-            <div class="text-amber-400 text-[10px] sm:text-xs font-bold text-center mb-1">OBJETIVO</div>
-            <div class="bg-[#090604] p-1 rounded border border-amber-900/60 flex items-center justify-center aspect-square w-full">
-                <canvas id="targetCanvas" width="128" height="128" class="w-full h-full object-contain"></canvas>
-            </div>
-            <div class="text-emerald-400 text-[9px] mt-1 text-center font-semibold leading-tight">
-                META: ≥78%
-            </div>
-        </div>
-
-        <!-- Interactive Workshop Canvas (Main Game) -->
-        <div id="workshopBox" class="ascii-box p-1.5 rounded-md flex-1 h-full max-w-[380px] flex flex-col items-center justify-between overflow-hidden">
-            <div class="text-amber-400 text-[10px] sm:text-xs font-bold tracking-widest text-center w-full flex justify-between px-1 shrink-0">
-                <span>TALLER</span>
-                <span class="text-emerald-400 text-[9px]">▼ TRITURADORA LENTA ▼</span>
-            </div>
-
-            <!-- Square Workspace Container -->
-            <div class="relative w-full aspect-square max-h-[82dvh] bg-[#080503] border border-amber-800/80 rounded overflow-hidden flex items-center justify-center my-auto">
-                <!-- Swipe Hint Overlay -->
-                <div id="canvasHelpHint" class="absolute top-2 inset-x-0 text-center pointer-events-none z-20 transition-opacity duration-300">
-                    <span class="bg-black/90 text-amber-300 text-[10px] px-2 py-0.5 rounded border border-amber-700/60 shadow">
-                        Desliza con el dedo para cortar
-                    </span>
-                </div>
-
-                <!-- Toast Banner for Resets/Warnings -->
-                <div id="toastBanner" class="absolute top-1/2 inset-x-2 -translate-y-1/2 text-center pointer-events-none z-30 opacity-0 transition-opacity duration-300">
-                    <span id="toastText" class="bg-amber-950/95 text-amber-300 font-bold text-xs px-3 py-2 rounded border border-amber-500 shadow-2xl block">
-                        ¡Cortes agotados! Reiniciando figura...
-                    </span>
-                </div>
-
-                <!-- Canvas -->
-                <canvas id="workshopCanvas" width="320" height="320" class="w-full h-full cursor-crosshair touch-none"></canvas>
-            </div>
-        </div>
-    </main>
-
-    <!-- Bottom Action Controls -->
-    <footer class="w-full shrink-0 my-1 flex items-center justify-between gap-2">
-        <button id="resetWoodBtn" class="ascii-btn px-2.5 py-1.5 text-xs rounded flex-1">
-            [ ↻ REINICIAR ]
-        </button>
-        <button id="soundToggleBtn" class="ascii-btn px-2 py-1.5 text-xs rounded">
-            [ 🔊 SONIDO ]
-        </button>
-        <button id="helpBtn" class="ascii-btn ascii-btn-green px-2.5 py-1.5 text-xs rounded">
-            [ ? AYUDA ]
-        </button>
-    </footer>
-
-    <!-- Tutorial Modal -->
-    <div id="helpModal" class="fixed inset-0 bg-black/92 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3">
-        <div class="ascii-box p-4 rounded-lg max-w-sm w-full text-xs space-y-2.5">
-            <div class="text-amber-400 font-bold text-center text-sm border-b border-amber-800 pb-1">
-                ¿CÓMO JUGAR CORTA MADERA?
-            </div>
-            
-            <div class="space-y-2 text-neutral-300 leading-normal">
-                <p>
-                    <strong class="text-amber-400">1. DESLIZA PARA CORTAR:</strong><br>
-                    Arrastra el dedo para trazar una línea y recortar la madera. Las piezas sueltas caerán solas.
-                </p>
-                <p>
-                    <strong class="text-emerald-400">2. HASTA 4 CORTES PERMITIDOS:</strong><br>
-                    Tienes <strong class="text-amber-300">4 intentos de corte</strong> por figura. Si logras al menos un <strong class="text-cyan-400">78% de precisión</strong> en cualquier corte, ganas la figura.
-                </p>
-                <p>
-                    <strong class="text-amber-400">3. REINICIO DE INTENTOS:</strong><br>
-                    Si gastas los 4 cortes sin llegar al 78%, la figura se reinicia para que lo vuelvas a intentar.
-                </p>
-                <p>
-                    <strong class="text-red-400">4. TRITURADORA LENTA:</strong><br>
-                    Cuentas con un margen de 18-20 segundos antes de que la madera toque los dientes inferiores.
-                </p>
-            </div>
-
-            <div class="pt-2 text-center">
-                <button id="closeHelpBtn" class="ascii-btn ascii-btn-green px-5 py-1.5 text-xs font-bold rounded w-full">
-                    [ ¡ENTENDIDO! ]
-                </button>
-            </div>
-        </div>
+  <div class="hud-target">
+    <div class="target-preview">
+      <label>OBJETIVO ASCII</label>
+      <pre id="target-ascii" class="ascii-target"></pre>
     </div>
-
-    <!-- Game Over Modal -->
-    <div id="gameOverModal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 hidden flex items-center justify-center p-3">
-        <div class="ascii-box p-5 rounded-lg max-w-xs w-full text-center">
-            <pre class="text-red-500 font-bold text-[10px] leading-tight mb-2 glow-red overflow-hidden">
-▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-│  ¡MADERA TRITURADA!  │
-▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲</pre>
-
-            <div class="text-emerald-400 font-bold text-lg my-3 glow-green" id="finalFiguresText">
-                FIGURAS COMPLETADAS: 00
-            </div>
-
-            <div class="text-neutral-300 text-xs mb-4 space-y-1 bg-[#0f0a06] p-2.5 rounded border border-amber-900/60">
-                <div>PRECISIÓN PROMEDIO: <span id="finalAvgAcc" class="text-cyan-400 font-bold">0%</span></div>
-                <div>CORTES REALIZADOS: <span id="finalCutsCount" class="text-amber-400 font-bold">0</span></div>
-            </div>
-
-            <button id="restartGameBtn" class="ascii-btn ascii-btn-green px-5 py-2 text-xs font-bold rounded w-full shadow-lg">
-                [ ↻ REINTENTAR TALLER ]
-            </button>
-        </div>
+    <div class="hud-stats">
+      <div>FIGURA: <span id="fig-idx" class="stat-val">1/10</span></div>
+      <div>PRECISIÓN: <span id="acc-val" class="stat-val">0%</span> (Min 75%)</div>
+      <div>CORTES: <span id="cuts-left" class="stat-val">0 / 4</span></div>
+      <div>COMPLETADAS: <span id="score-val" class="stat-val">0</span></div>
     </div>
-
-    <script>
-        class SoundEngine {
-            constructor() {
-                this.ctx = null;
-                this.enabled = true;
-                this.sawNoise = null;
-                this.sawOsc = null;
-            }
-
-            init() {
-                if (!this.ctx) {
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    if (AudioCtx) this.ctx = new AudioCtx();
-                }
-                if (this.ctx && this.ctx.state === 'suspended') {
-                    this.ctx.resume();
-                }
-            }
-
-            toggleSound() {
-                this.enabled = !this.enabled;
-                return this.enabled;
-            }
-
-            playClick() {
-                if (!this.enabled) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(260, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.04);
-
-                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.04);
-            }
-
-            startSawing() {
-                if (!this.enabled) return;
-                this.init();
-                if (!this.ctx || this.sawOsc) return;
-
-                try {
-                    const bufferSize = this.ctx.sampleRate * 0.08;
-                    const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                    const output = noiseBuffer.getChannelData(0);
-                    for (let i = 0; i < bufferSize; i++) {
-                        output[i] = Math.random() * 2 - 1;
-                    }
-
-                    this.sawNoise = this.ctx.createBufferSource();
-                    this.sawNoise.buffer = noiseBuffer;
-                    this.sawNoise.loop = true;
-
-                    const filter = this.ctx.createBiquadFilter();
-                    filter.type = 'bandpass';
-                    filter.frequency.value = 900;
-                    filter.Q.value = 2.5;
-
-                    this.sawGain = this.ctx.createGain();
-                    this.sawGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-
-                    this.sawNoise.connect(filter);
-                    filter.connect(this.sawGain);
-                    this.sawGain.connect(this.ctx.destination);
-                    this.sawNoise.start();
-                    this.sawOsc = true;
-                } catch(e) {}
-            }
-
-            stopSawing() {
-                if (this.sawNoise) {
-                    try {
-                        this.sawNoise.stop();
-                        this.sawNoise.disconnect();
-                    } catch(e) {}
-                    this.sawNoise = null;
-                    this.sawOsc = null;
-                }
-            }
-
-            playCutRelease() {
-                if (!this.enabled) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(340, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.07);
-
-                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.07);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.07);
-            }
-
-            playSuccess() {
-                if (!this.enabled) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                notes.forEach((freq, idx) => {
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.value = freq;
-
-                    const startTime = this.ctx.currentTime + idx * 0.05;
-                    gain.gain.setValueAtTime(0.15, startTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.18);
-
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start(startTime);
-                    osc.stop(startTime + 0.18);
-                });
-            }
-
-            playResetWarning() {
-                if (!this.enabled) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.15);
-
-                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.15);
-            }
-
-            playCrushCrunch() {
-                if (!this.enabled) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(110, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(25, this.ctx.currentTime + 0.15);
-
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.15);
-            }
-
-            playAlarm() {
-                if (!this.enabled) return;
-                this.init();
-                if (!this.ctx) return;
-
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(750, this.ctx.currentTime);
-                osc.frequency.setValueAtTime(380, this.ctx.currentTime + 0.08);
-
-                gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.15);
-            }
-        }
-
-        const sound = new SoundEngine();
-
-        // Grid setup: 16 cols x 16 rows
-        const GRID_COLS = 16;
-        const GRID_ROWS = 16;
-        const MAX_CUTS_PER_FIGURE = 4;
-        const WIN_ACCURACY_THRESHOLD = 78; // Permissive accuracy goal!
-
-        // Base Wood Block positioned in middle-top (rows 1..10)
-        const BASE_BLOCK = {
-            rStart: 1,
-            rEnd: 10,
-            cStart: 3,
-            cEnd: 12
-        };
-
-        // 10 EASY, SOLID TARGET FIGURES
-        const TARGET_FIGURES = [
-            {
-                name: "RAMPA DIAGONAL",
-                grid: [
-                    "                ",
-                    "   ██           ",
-                    "   ████         ",
-                    "   ██████       ",
-                    "   ████████     ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "TEJADO / FLECHA",
-                grid: [
-                    "                ",
-                    "       ██       ",
-                    "     ██████     ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "FORMA DE L",
-                grid: [
-                    "                ",
-                    "   ████         ",
-                    "   ████         ",
-                    "   ████         ",
-                    "   ████         ",
-                    "   ████         ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "TRAPEZIO",
-                grid: [
-                    "                ",
-                    "     ██████     ",
-                    "     ██████     ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "ESCALÓN DERECHO",
-                grid: [
-                    "                ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████       ",
-                    "   ██████       ",
-                    "   ██████       ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "PIRÁMIDE",
-                grid: [
-                    "                ",
-                    "       ██       ",
-                    "     ██████     ",
-                    "     ██████     ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "FORMA DE T",
-                grid: [
-                    "                ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "     ██████     ",
-                    "     ██████     ",
-                    "     ██████     ",
-                    "     ██████     ",
-                    "     ██████     ",
-                    "     ██████     ",
-                    "     ██████     ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "DIAMANTE CORTADO",
-                grid: [
-                    "                ",
-                    "     ██████     ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "     ██████     ",
-                    "       ██       ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "MESA / MUESCA",
-                grid: [
-                    "                ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██      ██   ",
-                    "   ██      ██   ",
-                    "   ██      ██   ",
-                    "   ██      ██   ",
-                    "   ██      ██   ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            },
-            {
-                name: "TRIÁNGULO CENTRADO",
-                grid: [
-                    "                ",
-                    "       ██       ",
-                    "      ████      ",
-                    "     ██████     ",
-                    "    ████████    ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "   ██████████   ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                ",
-                    "                "
-                ]
-            }
-        ];
-
-        let currentLevelIdx = 0;
-        let isGameRunning = false;
-        let figuresCompleted = 0;
-        let totalAccuracySum = 0;
-        let totalCutsMade = 0;
-        let cutsRemaining = MAX_CUTS_PER_FIGURE;
-
-        let playerGrid = [];
-
-        // Crusher descent physics (Very slow: ~18-20s safe window)
-        let woodYOffset = 0;
-        const descentSpeed = 0.055; 
-        const CRUSHER_Y_LIMIT = 272; // Y pixel position of crusher
-        const INITIAL_MAX_GAP = 60;
-
-        let isDragging = false;
-        let currentCutLine = { start: null, end: null };
-
-        let sawdustParticles = [];
-        let fallingWoodPieces = [];
-
-        const workshopCanvas = document.getElementById('workshopCanvas');
-        const wsCtx = workshopCanvas.getContext('2d');
-
-        const targetCanvas = document.getElementById('targetCanvas');
-        const tgCtx = targetCanvas.getContext('2d');
-
-        const CELL_W = workshopCanvas.width / GRID_COLS; // 20px
-        const CELL_H = workshopCanvas.height / GRID_ROWS; // 20px
-
-        function initPlayerWood() {
-            playerGrid = Array(GRID_ROWS).fill(null).map(() => Array(GRID_COLS).fill(' '));
-            woodYOffset = 0;
-            cutsRemaining = MAX_CUTS_PER_FIGURE;
-            updateCutsHUD();
-
-            for (let r = BASE_BLOCK.rStart; r <= BASE_BLOCK.rEnd; r++) {
-                for (let c = BASE_BLOCK.cStart; c <= BASE_BLOCK.cEnd; c++) {
-                    const rand = Math.random();
-                    if (rand > 0.82) playerGrid[r][c] = '▓';
-                    else if (rand > 0.65) playerGrid[r][c] = '▒';
-                    else playerGrid[r][c] = '█';
-                }
-            }
-        }
-
-        function updateCutsHUD() {
-            document.getElementById('cutsVal').innerText = `${cutsRemaining}/${MAX_CUTS_PER_FIGURE}`;
-            const filled = '█'.repeat(cutsRemaining);
-            const empty = '░'.repeat(MAX_CUTS_PER_FIGURE - cutsRemaining);
-            document.getElementById('cutsBar').innerText = filled + empty;
-        }
-
-        function renderTargetCanvas() {
-            tgCtx.fillStyle = '#090604';
-            tgCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
-
-            const fig = TARGET_FIGURES[currentLevelIdx % TARGET_FIGURES.length];
-            const cellW = targetCanvas.width / GRID_COLS;
-            const cellH = targetCanvas.height / GRID_ROWS;
-
-            tgCtx.font = '10px "Fira Code", monospace';
-            tgCtx.textAlign = 'center';
-            tgCtx.textBaseline = 'middle';
-
-            for (let r = 0; r < GRID_ROWS; r++) {
-                for (let c = 0; c < GRID_COLS; c++) {
-                    const char = fig.grid[r][c];
-                    if (char !== ' ') {
-                        tgCtx.fillStyle = '#78350f';
-                        tgCtx.fillRect(c * cellW + 0.5, r * cellH + 0.5, cellW - 1, cellH - 1);
-
-                        tgCtx.fillStyle = '#f59e0b';
-                        tgCtx.fillText('█', c * cellW + cellW / 2, r * cellH + cellH / 2);
-                    }
-                }
-            }
-        }
-
-        // Exact touch/pointer position mapping with Canvas scale factor
-        function getCanvasPos(e) {
-            const rect = workshopCanvas.getBoundingClientRect();
-            let clientX, clientY;
-
-            if (e.touches && e.touches.length > 0) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else if (e.changedTouches && e.changedTouches.length > 0) {
-                clientX = e.changedTouches[0].clientX;
-                clientY = e.changedTouches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-
-            const scaleX = workshopCanvas.width / rect.width;
-            const scaleY = workshopCanvas.height / rect.height;
-
-            return {
-                x: (clientX - rect.left) * scaleX,
-                y: (clientY - rect.top) * scaleY
-            };
-        }
-
-        function getCellsOnLine(p1, p2) {
-            const cells = [];
-            const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-            const steps = Math.max(1, Math.ceil(dist / (CELL_W / 3)));
-            const visited = new Set();
-
-            for (let i = 0; i <= steps; i++) {
-                const t = i / steps;
-                const px = p1.x + t * (p2.x - p1.x);
-                const py = p1.y + t * (p2.y - p1.y) - woodYOffset;
-
-                const c = Math.floor(px / CELL_W);
-                const r = Math.floor(py / CELL_H);
-
-                if (c >= 0 && c < GRID_COLS && r >= 0 && r < GRID_ROWS) {
-                    const key = `${r},${c}`;
-                    if (!visited.has(key)) {
-                        visited.add(key);
-                        cells.push({ r, c });
-                    }
-                }
-            }
-            return cells;
-        }
-
-        function executeCut() {
-            if (!currentCutLine.start || !currentCutLine.end) return;
-
-            const dist = Math.hypot(
-                currentCutLine.end.x - currentCutLine.start.x,
-                currentCutLine.end.y - currentCutLine.start.y
-            );
-            if (dist < 12) return;
-
-            if (cutsRemaining <= 0) return;
-
-            cutsRemaining--;
-            totalCutsMade++;
-            updateCutsHUD();
-            sound.playCutRelease();
-
-            const cutCells = getCellsOnLine(currentCutLine.start, currentCutLine.end);
-
-            cutCells.forEach(cell => {
-                if (playerGrid[cell.r][cell.c] !== ' ') {
-                    spawnSawdustBurst(cell.c, cell.r, 3, woodYOffset);
-                    playerGrid[cell.r][cell.c] = ' ';
-                }
-            });
-
-            checkAndDetachPieces();
-            const currentAcc = calculateAccuracy();
-
-            // Win condition (>= 78% accuracy)
-            if (currentAcc >= WIN_ACCURACY_THRESHOLD && isGameRunning) {
-                sound.playSuccess();
-                figuresCompleted++;
-                totalAccuracySum += currentAcc;
-
-                document.getElementById('figuresCount').innerText = String(figuresCompleted).padStart(2, '0');
-
-                showToast("¡FIGURA COMPLETADA!", "text-emerald-300 border-emerald-500 bg-emerald-950/95");
-
-                isGameRunning = false;
-                setTimeout(() => {
-                    currentLevelIdx++;
-                    loadLevel(currentLevelIdx);
-                    isGameRunning = true;
-                }, 650);
-            } 
-            // If cuts run out without reaching 78% accuracy -> auto reset figure
-            else if (cutsRemaining <= 0 && isGameRunning) {
-                sound.playResetWarning();
-                showToast("¡Cortes agotados! Reiniciando...", "text-amber-300 border-amber-500 bg-amber-950/95");
-
-                setTimeout(() => {
-                    initPlayerWood();
-                    calculateAccuracy();
-                }, 750);
-            }
-        }
-
-        function showToast(msg, colorClass) {
-            const toast = document.getElementById('toastBanner');
-            const text = document.getElementById('toastText');
-            if (toast && text) {
-                text.innerText = msg;
-                text.className = `font-bold text-xs px-3 py-2 rounded border shadow-2xl block ${colorClass}`;
-                toast.style.opacity = '1';
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                }, 1200);
-            }
-        }
-
-        function checkAndDetachPieces() {
-            const visited = Array(GRID_ROWS).fill(null).map(() => Array(GRID_COLS).fill(false));
-            const components = [];
-
-            for (let r = 0; r < GRID_ROWS; r++) {
-                for (let c = 0; c < GRID_COLS; c++) {
-                    if (playerGrid[r][c] !== ' ' && !visited[r][c]) {
-                        const comp = [];
-                        const queue = [{ r, c }];
-                        visited[r][c] = true;
-
-                        while (queue.length > 0) {
-                            const curr = queue.shift();
-                            comp.push(curr);
-
-                            const neighbors = [
-                                { r: curr.r - 1, c: curr.c },
-                                { r: curr.r + 1, c: curr.c },
-                                { r: curr.r, c: curr.c - 1 },
-                                { r: curr.r, c: curr.c + 1 }
-                            ];
-
-                            neighbors.forEach(n => {
-                                if (n.r >= 0 && n.r < GRID_ROWS && n.c >= 0 && n.c < GRID_COLS) {
-                                    if (playerGrid[n.r][n.c] !== ' ' && !visited[n.r][n.c]) {
-                                        visited[n.r][n.c] = true;
-                                        queue.push(n);
-                                    }
-                                }
-                            });
-                        }
-                        components.push(comp);
-                    }
-                }
-            }
-
-            if (components.length > 1) {
-                components.sort((a, b) => b.length - a.length);
-
-                for (let i = 1; i < components.length; i++) {
-                    const detached = components[i];
-                    const pieceObj = {
-                        cells: detached.map(pt => ({
-                            r: pt.r,
-                            c: pt.c,
-                            char: playerGrid[pt.r][pt.c]
-                        })),
-                        x: 0,
-                        y: woodYOffset,
-                        vx: (Math.random() - 0.5) * 2.2,
-                        vy: Math.random() * 1.8 + 1.2
-                    };
-
-                    fallingWoodPieces.push(pieceObj);
-
-                    detached.forEach(pt => {
-                        playerGrid[pt.r][pt.c] = ' ';
-                    });
-                }
-            }
-        }
-
-        function spawnSawdustBurst(gridCol, gridRow, count, yOffset = 0) {
-            const symbols = ['.', '*', "'", '°', '░', '+', ','];
-            for (let i = 0; i < count; i++) {
-                sawdustParticles.push({
-                    x: (gridCol + 0.5) * CELL_W,
-                    y: (gridRow + 0.5) * CELL_H + yOffset,
-                    vx: (Math.random() - 0.5) * 4,
-                    vy: (Math.random() - 0.5) * 4 - 1.5,
-                    char: symbols[Math.floor(Math.random() * symbols.length)],
-                    color: Math.random() > 0.4 ? '#f59e0b' : '#d97706',
-                    life: 1.0
-                });
-            }
-        }
-
-        function calculateAccuracy() {
-            const fig = TARGET_FIGURES[currentLevelIdx % TARGET_FIGURES.length];
-            let targetSolid = 0;
-            let playerSolid = 0;
-            let overlapSolid = 0;
-
-            for (let r = 0; r < GRID_ROWS; r++) {
-                for (let c = 0; c < GRID_COLS; c++) {
-                    const isTarget = fig.grid[r][c] !== ' ';
-                    const isPlayer = playerGrid[r][c] !== ' ';
-
-                    if (isTarget) targetSolid++;
-                    if (isPlayer) playerSolid++;
-                    if (isTarget && isPlayer) overlapSolid++;
-                }
-            }
-
-            const maxSolid = Math.max(targetSolid, playerSolid);
-            const accuracy = maxSolid > 0 ? Math.round((overlapSolid / maxSolid) * 100) : 100;
-
-            document.getElementById('accuracyVal').innerText = accuracy + '%';
-            return accuracy;
-        }
-
-        function renderWorkshopCanvas() {
-            wsCtx.fillStyle = '#080503';
-            wsCtx.fillRect(0, 0, workshopCanvas.width, workshopCanvas.height);
-
-            if (isGameRunning) {
-                woodYOffset += descentSpeed;
-
-                let lowestRow = -1;
-                for (let r = GRID_ROWS - 1; r >= 0; r--) {
-                    if (playerGrid[r].some(c => c !== ' ')) {
-                        lowestRow = r;
-                        break;
-                    }
-                }
-
-                if (lowestRow !== -1) {
-                    const lowestY = (lowestRow + 1) * CELL_H + woodYOffset;
-                    const distToCrusher = Math.max(0, CRUSHER_Y_LIMIT - lowestY);
-
-                    const safePercent = Math.min(100, Math.max(0, Math.round((distToCrusher / INITIAL_MAX_GAP) * 100)));
-                    document.getElementById('crusherPercent').innerText = safePercent + '%';
-
-                    if (safePercent <= 20) {
-                        document.getElementById('crusherPercent').className = 'text-red-500 font-bold text-xs animate-pulse glow-red';
-                        if (Math.random() < 0.03) sound.playAlarm();
-                    } else if (safePercent <= 50) {
-                        document.getElementById('crusherPercent').className = 'text-amber-400 font-bold text-xs';
-                    } else {
-                        document.getElementById('crusherPercent').className = 'text-emerald-400 font-bold text-xs';
-                    }
-
-                    if (lowestY >= CRUSHER_Y_LIMIT) {
-                        sound.playCrushCrunch();
-                        endGame();
-                    }
-                }
-            }
-
-            // Draw Background Grid
-            wsCtx.strokeStyle = '#24160e';
-            wsCtx.lineWidth = 1;
-            for (let c = 0; c <= GRID_COLS; c++) {
-                wsCtx.beginPath();
-                wsCtx.moveTo(c * CELL_W, 0);
-                wsCtx.lineTo(c * CELL_W, workshopCanvas.height);
-                wsCtx.stroke();
-            }
-
-            // Draw Main Wood Block
-            wsCtx.font = '14px "Fira Code", monospace';
-            wsCtx.textAlign = 'center';
-            wsCtx.textBaseline = 'middle';
-
-            wsCtx.save();
-            wsCtx.translate(0, woodYOffset);
-
-            for (let r = 0; r < GRID_ROWS; r++) {
-                for (let c = 0; c < GRID_COLS; c++) {
-                    const char = playerGrid[r][c];
-                    if (char !== ' ') {
-                        wsCtx.fillStyle = '#d97706';
-                        wsCtx.fillRect(c * CELL_W + 0.5, r * CELL_H + 0.5, CELL_W - 1, CELL_H - 1);
-
-                        wsCtx.fillStyle = '#78350f';
-                        wsCtx.fillText(char, (c + 0.5) * CELL_W, (r + 0.5) * CELL_H);
-                    }
-                }
-            }
-
-            wsCtx.restore();
-
-            // Render Falling Offcuts
-            for (let i = fallingWoodPieces.length - 1; i >= 0; i--) {
-                const piece = fallingWoodPieces[i];
-                piece.y += piece.vy;
-                piece.x += piece.vx;
-                piece.vy += 0.3;
-
-                wsCtx.save();
-                wsCtx.fillStyle = '#b45309';
-
-                piece.cells.forEach(cell => {
-                    const px = (cell.c + 0.5) * CELL_W + piece.x;
-                    const py = (cell.r + 0.5) * CELL_H + piece.y;
-
-                    if (py < CRUSHER_Y_LIMIT) {
-                        wsCtx.fillRect(px - CELL_W / 2, py - CELL_H / 2, CELL_W - 1, CELL_H - 1);
-                        wsCtx.fillStyle = '#f59e0b';
-                        wsCtx.fillText(cell.char, px, py);
-                    } else {
-                        sound.playCrushCrunch();
-                        spawnSawdustBurst(cell.c, cell.r, 2, piece.y);
-                    }
-                });
-
-                wsCtx.restore();
-
-                if (piece.y > CRUSHER_Y_LIMIT + 20) {
-                    fallingWoodPieces.splice(i, 1);
-                }
-            }
-
-            // Render Sawdust Particles
-            for (let i = sawdustParticles.length - 1; i >= 0; i--) {
-                const p = sawdustParticles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life -= 0.04;
-
-                wsCtx.fillStyle = p.color;
-                wsCtx.globalAlpha = Math.max(0, p.life);
-                wsCtx.font = '11px "Fira Code", monospace';
-                wsCtx.fillText(p.char, p.x, p.y);
-                wsCtx.globalAlpha = 1.0;
-
-                if (p.life <= 0) sawdustParticles.splice(i, 1);
-            }
-
-            // Render Crusher Teeth
-            wsCtx.fillStyle = '#ef4444';
-            wsCtx.fillRect(0, CRUSHER_Y_LIMIT, workshopCanvas.width, workshopCanvas.height - CRUSHER_Y_LIMIT);
-
-            wsCtx.fillStyle = '#7f1d1d';
-            wsCtx.font = 'bold 11px "Fira Code", monospace';
-            wsCtx.textAlign = 'center';
-            wsCtx.fillText('▲▲▲▲ TRITURADORA ▲▲▲▲', workshopCanvas.width / 2, CRUSHER_Y_LIMIT + 12);
-            wsCtx.fillText('██████████████████████', workshopCanvas.width / 2, CRUSHER_Y_LIMIT + 28);
-
-            // Active Cut Line
-            if (isDragging && currentCutLine.start && currentCutLine.end) {
-                wsCtx.beginPath();
-                wsCtx.moveTo(currentCutLine.start.x, currentCutLine.start.y);
-                wsCtx.lineTo(currentCutLine.end.x, currentCutLine.end.y);
-
-                wsCtx.strokeStyle = '#ef4444';
-                wsCtx.lineWidth = 3;
-                wsCtx.lineCap = 'round';
-                wsCtx.shadowColor = '#ef4444';
-                wsCtx.shadowBlur = 6;
-                wsCtx.stroke();
-                wsCtx.shadowBlur = 0;
-
-                wsCtx.fillStyle = '#ffffff';
-                wsCtx.font = '16px "Fira Code", monospace';
-                wsCtx.fillText('*', currentCutLine.end.x, currentCutLine.end.y);
-            }
-
-            requestAnimationFrame(renderWorkshopCanvas);
-        }
-
-        function onPointerDown(e) {
-            if (!isGameRunning || cutsRemaining <= 0) return;
-            e.preventDefault();
-            sound.init();
-            sound.startSawing();
-            isDragging = true;
-
-            const pos = getCanvasPos(e);
-            currentCutLine.start = pos;
-            currentCutLine.end = pos;
-
-            const hint = document.getElementById('canvasHelpHint');
-            if (hint) hint.style.opacity = '0';
-        }
-
-        function onPointerMove(e) {
-            if (!isDragging || !isGameRunning) return;
-            e.preventDefault();
-            const pos = getCanvasPos(e);
-            currentCutLine.end = pos;
-
-            const c = Math.floor(pos.x / CELL_W);
-            const r = Math.floor((pos.y - woodYOffset) / CELL_H);
-            if (c >= 0 && c < GRID_COLS && r >= 0 && r < GRID_ROWS) {
-                spawnSawdustBurst(c, r, 1, woodYOffset);
-            }
-        }
-
-        function onPointerUp(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            isDragging = false;
-            sound.stopSawing();
-
-            executeCut();
-            currentCutLine = { start: null, end: null };
-        }
-
-        // Touch & Pointer Bindings
-        workshopCanvas.addEventListener('pointerdown', onPointerDown, { passive: false });
-        window.addEventListener('pointermove', onPointerMove, { passive: false });
-        window.addEventListener('pointerup', onPointerUp, { passive: false });
-        window.addEventListener('pointercancel', onPointerUp, { passive: false });
-
-        function loadLevel(idx) {
-            const fig = TARGET_FIGURES[idx % TARGET_FIGURES.length];
-            document.getElementById('targetName').innerText = `[ FIGURA ${idx + 1}/${TARGET_FIGURES.length}: ${fig.name} ]`;
-
-            initPlayerWood();
-            renderTargetCanvas();
-            calculateAccuracy();
-        }
-
-        function startGame() {
-            currentLevelIdx = 0;
-            figuresCompleted = 0;
-            totalAccuracySum = 0;
-            totalCutsMade = 0;
-            isGameRunning = true;
-
-            document.getElementById('figuresCount').innerText = '00';
-            document.getElementById('gameOverModal').classList.add('hidden');
-            document.getElementById('gameOverModal').classList.remove('flex');
-
-            loadLevel(currentLevelIdx);
-        }
-
-        function endGame() {
-            isGameRunning = false;
-
-            const avgAcc = figuresCompleted > 0 ? Math.round(totalAccuracySum / figuresCompleted) : 0;
-            document.getElementById('finalFiguresText').innerText = `FIGURAS COMPLETADAS: ${String(figuresCompleted).padStart(2, '0')}`;
-            document.getElementById('finalAvgAcc').innerText = avgAcc + '%';
-            document.getElementById('finalCutsCount').innerText = totalCutsMade;
-
-            const modal = document.getElementById('gameOverModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        // Button Listeners
-        document.getElementById('resetWoodBtn').addEventListener('click', () => {
-            sound.playClick();
-            initPlayerWood();
-            calculateAccuracy();
+  </div>
+
+  <div class="timer-container">
+    <div class="timer-label">
+      <span>▲▲ TRITURADORA ▲▲</span>
+      <span id="timer-text">10.0s</span>
+    </div>
+    <div class="timer-bar-bg">
+      <div id="timer-bar" class="timer-bar-fill"></div>
+    </div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="gameCanvas" width="360" height="360"></canvas>
+    <div id="start-overlay" class="overlay">
+      <div style="font-size:1.2rem; font-weight:bold; margin-bottom:10px;">¡CORTA LA MADERA!</div>
+      <div style="font-size:0.8rem; color:#aaa; margin-bottom:15px;">Desliza el dedo o ratón para recortar el bloque y replicar la figura verde.</div>
+      <div style="font-size:0.9rem; color:#55ff55; animation: pulse 1s infinite;">👉 TOCA PARA EMPEZAR 👈</div>
+    </div>
+    <div id="status-overlay" class="overlay" style="display:none;"></div>
+  </div>
+
+  <footer>
+    <button id="reset-btn">REINICIAR FIGURA</button>
+  </footer>
+</div>
+
+<script>
+// --- SINTETIZADOR DE AUDIO ROBUSTO ---
+class SoundFX {
+  constructor() {
+    this.ctx = null;
+  }
+  init() {
+    if (!this.ctx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) this.ctx = new AudioCtx();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+  playCut() {
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.1);
+    } catch (e) {}
+  }
+  playSuccess() {
+    if (!this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      [320, 440, 660].forEach((f, i) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, now + i * 0.07);
+        gain.gain.setValueAtTime(0.2, now + i * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.07 + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + i * 0.07);
+        osc.stop(now + i * 0.07 + 0.12);
+      });
+    } catch (e) {}
+  }
+  playFail() {
+    if (!this.ctx) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(100, this.ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(50, this.ctx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.25);
+    } catch (e) {}
+  }
+}
+
+const sfx = new SoundFX();
+
+// --- CONFIGURACIÓN Y FIGURAS ---
+const GRID_SIZE = 10;
+const FIGURES = [
+  // 1. Rampa
+  { name: "RAMPA", grid: [
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,1,0],
+    [0,0,0,0,0,0,0,1,1,0],
+    [0,0,0,0,0,0,1,1,1,0],
+    [0,0,0,0,0,1,1,1,1,0],
+    [0,0,0,0,1,1,1,1,1,0],
+    [0,0,0,1,1,1,1,1,1,0],
+    [0,0,1,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,0,0,0,0,0,0,0,0,0]
+  ]},
+  // 2. Tejado
+  { name: "TEJADO", grid: [
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,1,1,0,0,0,0],
+    [0,0,0,1,1,1,1,0,0,0],
+    [0,0,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,0,0,0,0,0,0,0,0,0]
+  ]},
+  // 3. Forma L
+  { name: "FORMA L", grid: [
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,1,1,1,0,0,0,0,0,0],
+    [0,1,1,1,0,0,0,0,0,0],
+    [0,1,1,1,0,0,0,0,0,0],
+    [0,1,1,1,0,0,0,0,0,0],
+    [0,1,1,1,0,0,0,0,0,0],
+    [0,1,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0]
+  ]},
+  // 4. Trapecio
+  { name: "TRAPECIO", grid: [
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,1,1,1,1,0,0,0],
+    [0,0,0,1,1,1,1,0,0,0],
+    [0,0,1,1,1,1,1,1,0,0],
+    [0,0,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,1,1,1,1,1,1,1,1,0],
+    [0,0,0,0,0,0,0,0,0,0]
+  ]},
+  // 5. Escalón
+  { name: "ESCALON", grid: [
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,1,1,1,0,0],
+    [0,0,0,0,0,1,1,1,0,0],
+    [0,0,0,0,0,1,1,1,0,0],
+    [0,0,0,1,1,1,1,1,0,0],
+    [0,0,0,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0]
+  ]}
+];
+
+// --- ESTADO DEL JUEGO ---
+let gameStarted = false;
+let isGameOver = false;
+let currentFigIndex = 0;
+let currentScore = 0;
+let cutsUsed = 0;
+const MAX_CUTS = 4;
+const TOTAL_TIME = 10.0;
+let timeLeft = TOTAL_TIME;
+
+let woodGrid = [];
+let particles = [];
+let cutStart = null;
+let cutEnd = null;
+let isDragging = false;
+let lastTimestamp = 0;
+
+// Elementos DOM
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const startOverlay = document.getElementById('start-overlay');
+const statusOverlay = document.getElementById('status-overlay');
+const targetAsciiEl = document.getElementById('target-ascii');
+const figIdxEl = document.getElementById('fig-idx');
+const accValEl = document.getElementById('acc-val');
+const cutsLeftEl = document.getElementById('cuts-left');
+const scoreValEl = document.getElementById('score-val');
+const timerTextEl = document.getElementById('timer-text');
+const timerBarEl = document.getElementById('timer-bar');
+const resetBtn = document.getElementById('reset-btn');
+
+// --- INICIALIZACIÓN ---
+function init() {
+  // Eventos de puntero unificados (Ratón y Táctil)
+  canvas.addEventListener('pointerdown', onPointerDown);
+  canvas.addEventListener('pointermove', onPointerMove);
+  canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointercancel', onPointerUp);
+
+  startOverlay.addEventListener('click', startGame);
+  resetBtn.addEventListener('click', () => {
+    sfx.init();
+    loadFigure(currentFigIndex);
+  });
+
+  loadFigure(0);
+  requestAnimationFrame(gameLoop);
+}
+
+function startGame() {
+  sfx.init();
+  gameStarted = true;
+  startOverlay.style.display = 'none';
+  lastTimestamp = performance.now();
+}
+
+function loadFigure(idx) {
+  currentFigIndex = idx;
+  cutsUsed = 0;
+  timeLeft = TOTAL_TIME;
+  isGameOver = false;
+
+  // Crear bloque de madera de 8x8 centrado en la cuadrícula de 10x10
+  woodGrid = Array(GRID_SIZE).fill(null).map((_, r) => {
+    if (r >= 1 && r <= 8) {
+      return Array(GRID_SIZE).fill(0).map((_, c) => (c >= 1 && c <= 8) ? 1 : 0);
+    }
+    return Array(GRID_SIZE).fill(0);
+  });
+
+  renderTargetAscii();
+  updateHUD();
+  statusOverlay.style.display = 'none';
+}
+
+function renderTargetAscii() {
+  const fig = FIGURES[currentFigIndex];
+  let ascii = "";
+  for (let r = 0; r < GRID_SIZE; r += 2) {
+    let line = "";
+    for (let c = 0; c < GRID_SIZE; c++) {
+      line += fig.grid[r][c] ? "█" : " ";
+    }
+    ascii += line + "\n";
+  }
+  targetAsciiEl.textContent = ascii;
+}
+
+function updateHUD() {
+  figIdxEl.textContent = `${currentFigIndex + 1}/${FIGURES.length}`;
+  cutsLeftEl.textContent = `${cutsUsed} / ${MAX_CUTS}`;
+  scoreValEl.textContent = currentScore;
+
+  const acc = calculateAccuracy();
+  accValEl.textContent = `${acc}%`;
+
+  timerTextEl.textContent = `${timeLeft.toFixed(1)}s`;
+  const pct = Math.max(0, (timeLeft / TOTAL_TIME) * 100);
+  timerBarEl.style.width = `${pct}%`;
+  timerBarEl.style.backgroundColor = timeLeft < 3.0 ? '#ff0000' : '#ff4444';
+}
+
+function calculateAccuracy() {
+  const target = FIGURES[currentFigIndex].grid;
+  let matches = 0;
+  for (let r = 0; r < GRID_SIZE; r++) {
+    for (let c = 0; c < GRID_SIZE; c++) {
+      if (woodGrid[r][c] === target[r][c]) matches++;
+    }
+  }
+  return Math.round((matches / (GRID_SIZE * GRID_SIZE)) * 100);
+}
+
+// --- CONVERSIÓN DE COORDENADAS RÍGIDA Y EXACTA ---
+function getCanvasCoords(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  };
+}
+
+function onPointerDown(e) {
+  sfx.init();
+  if (!gameStarted) {
+    startGame();
+    return;
+  }
+  if (isGameOver) return;
+
+  canvas.setPointerCapture(e.pointerId);
+  isDragging = true;
+  const pos = getCanvasCoords(e);
+  cutStart = pos;
+  cutEnd = pos;
+}
+
+function onPointerMove(e) {
+  if (!isDragging) return;
+  cutEnd = getCanvasCoords(e);
+}
+
+function onPointerUp(e) {
+  if (!isDragging) return;
+  isDragging = false;
+
+  if (cutStart && cutEnd) {
+    const dist = Math.hypot(cutEnd.x - cutStart.x, cutEnd.y - cutStart.y);
+    if (dist > 15) {
+      applyCut(cutStart, cutEnd);
+    }
+  }
+  cutStart = null;
+  cutEnd = null;
+}
+
+// --- ALGORITMO DE CORTE DE MADERA ---
+function applyCut(p1, p2) {
+  if (cutsUsed >= MAX_CUTS) return;
+
+  sfx.playCut();
+  cutsUsed++;
+
+  const cellSize = canvas.width / GRID_SIZE;
+  const steps = Math.ceil(Math.hypot(p2.x - p1.x, p2.y - p1.y) / (cellSize / 4));
+  let cutCells = false;
+
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const px = p1.x + (p2.x - p1.x) * t;
+    const py = p1.y + (p2.y - p1.y) * t;
+
+    const col = Math.floor(px / cellSize);
+    const row = Math.floor(py / cellSize);
+
+    if (row >= 0 && row < GRID_SIZE && col >= 0 && col < GRID_SIZE) {
+      if (woodGrid[row][col] === 1) {
+        woodGrid[row][col] = 0;
+        cutCells = true;
+
+        // Partículas ASCII
+        particles.push({
+          x: (col + 0.5) * cellSize,
+          y: (row + 0.5) * cellSize,
+          vx: (Math.random() - 0.5) * 5,
+          vy: (Math.random() - 0.5) * 5 - 2,
+          char: ['*', '.', '░', '°'][Math.floor(Math.random() * 4)],
+          life: 1.0
         });
+      }
+    }
+  }
 
-        document.getElementById('soundToggleBtn').addEventListener('click', () => {
-            const state = sound.toggleSound();
-            document.getElementById('soundToggleBtn').innerText = state ? '[ 🔊 SONIDO ]' : '[ 🔇 SONIDO ]';
-        });
+  if (cutCells) {
+    removeDisconnectedPieces();
+  }
 
-        document.getElementById('helpBtn').addEventListener('click', () => {
-            sound.playClick();
-            document.getElementById('helpModal').classList.remove('hidden');
-            document.getElementById('helpModal').classList.add('flex');
-        });
+  const acc = calculateAccuracy();
+  updateHUD();
 
-        document.getElementById('closeHelpBtn').addEventListener('click', () => {
-            sound.playClick();
-            document.getElementById('helpModal').classList.add('hidden');
-            document.getElementById('helpModal').classList.remove('flex');
-        });
+  if (acc >= 75) {
+    handleWin();
+  } else if (cutsUsed >= MAX_CUTS) {
+    handleLoss("Límite de 4 cortes alcanzado");
+  }
+}
 
-        document.getElementById('restartGameBtn').addEventListener('click', () => {
-            sound.playClick();
-            startGame();
-        });
+function removeDisconnectedPieces() {
+  let visited = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(false));
+  let components = [];
 
-        window.onload = () => {
-            startGame();
-            requestAnimationFrame(renderWorkshopCanvas);
-        };
-    </script>
+  for (let r = 0; r < GRID_SIZE; r++) {
+    for (let c = 0; c < GRID_SIZE; c++) {
+      if (woodGrid[r][c] === 1 && !visited[r][c]) {
+        let comp = [];
+        let stack = [[r, c]];
+        visited[r][c] = true;
+
+        while (stack.length > 0) {
+          let [currR, currC] = stack.pop();
+          comp.push([currR, currC]);
+
+          const neighbors = [
+            [currR - 1, currC], [currR + 1, currC],
+            [currR, currC - 1], [currR, currC + 1]
+          ];
+
+          for (let [nr, nc] of neighbors) {
+            if (nr >= 0 && nr < GRID_SIZE && nc >= 0 && nc < GRID_SIZE) {
+              if (woodGrid[nr][nc] === 1 && !visited[nr][nc]) {
+                visited[nr][nc] = true;
+                stack.push([nr, nc]);
+              }
+            }
+          }
+        }
+        components.push(comp);
+      }
+    }
+  }
+
+  // Conserva solo la pieza conectada más grande
+  if (components.length > 1) {
+    components.sort((a, b) => b.length - a.length);
+    for (let i = 1; i < components.length; i++) {
+      for (let [r, c] of components[i]) {
+        woodGrid[r][c] = 0;
+      }
+    }
+  }
+}
+
+function handleWin() {
+  sfx.playSuccess();
+  currentScore++;
+  showOverlay("¡EXCELENTE!<br><small style='font-size:0.8rem; color:#fff;'>Figura Aprobada</small>");
+  setTimeout(() => {
+    currentFigIndex = (currentFigIndex + 1) % FIGURES.length;
+    loadFigure(currentFigIndex);
+  }, 1000);
+}
+
+function handleLoss(msg) {
+  sfx.playFail();
+  showOverlay(`TRITURADO<br><small style='font-size:0.75rem; color:#ffaaaa;'>${msg}</small>`);
+  setTimeout(() => {
+    loadFigure(currentFigIndex);
+  }, 1200);
+}
+
+function showOverlay(html) {
+  statusOverlay.innerHTML = html;
+  statusOverlay.style.display = 'flex';
+}
+
+// --- BUCLE PRINCIPAL DE JUEGO ---
+function gameLoop(timestamp) {
+  if (!lastTimestamp) lastTimestamp = timestamp;
+  const dt = (timestamp - lastTimestamp) / 1000;
+  lastTimestamp = timestamp;
+
+  if (gameStarted && !isGameOver && dt < 0.2) {
+    timeLeft -= dt;
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      isGameOver = true;
+      handleLoss("¡Tiempo agotado!");
+    }
+    updateHUD();
+  }
+
+  // Dibujar Canvas
+  ctx.fillStyle = '#050504';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const cellSize = canvas.width / GRID_SIZE;
+
+  // Línea de peligro de Trituradora
+  const progress = 1 - (timeLeft / TOTAL_TIME);
+  const crusherY = canvas.height * progress;
+  ctx.strokeStyle = 'rgba(255, 50, 50, 0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, crusherY);
+  ctx.lineTo(canvas.width, crusherY);
+  ctx.stroke();
+
+  // Renderizar celdas de madera y silueta objetivo
+  ctx.font = `${cellSize * 0.85}px monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const target = FIGURES[currentFigIndex].grid;
+
+  for (let r = 0; r < GRID_SIZE; r++) {
+    for (let c = 0; c < GRID_SIZE; c++) {
+      const x = (c + 0.5) * cellSize;
+      const y = (r + 0.5) * cellSize;
+
+      if (woodGrid[r][c] === 1) {
+        ctx.fillStyle = '#e69d35';
+        ctx.fillText('█', x, y);
+      } else if (target[r][c] === 1) {
+        ctx.fillStyle = 'rgba(85, 255, 85, 0.2)';
+        ctx.fillText('░', x, y);
+      }
+    }
+  }
+
+  // Dientes de trituradora abajo
+  ctx.fillStyle = '#ff3333';
+  const teeth = 10;
+  const tw = canvas.width / teeth;
+  for (let i = 0; i < teeth; i++) {
+    ctx.fillText('▲', (i + 0.5) * tw, canvas.height - 10);
+  }
+
+  // Trazo de corte actual
+  if (isDragging && cutStart && cutEnd) {
+    ctx.strokeStyle = '#ffff00';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cutStart.x, cutStart.y);
+    ctx.lineTo(cutEnd.x, cutEnd.y);
+    ctx.stroke();
+  }
+
+  // Partículas ASCII
+  for (let i = particles.length - 1; i >= 0; i--) {
+    let p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= dt * 2.5;
+
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+    } else {
+      ctx.fillStyle = `rgba(255, 184, 52, ${p.life})`;
+      ctx.fillText(p.char, p.x, p.y);
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+window.onload = init;
+</script>
 </body>
 </html>
